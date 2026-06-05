@@ -1,7 +1,7 @@
 package com.devon.building.repository.custom.impl;
 
+import com.devon.building.builder.CustomerSearchBuilder;
 import com.devon.building.entity.Customer;
-import com.devon.building.model.request.CustomerSearchRequest;
 import com.devon.building.repository.custom.CustomerRepositoryCustom;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -16,60 +16,46 @@ public class CustomerRepositoryImpl implements CustomerRepositoryCustom {
     @PersistenceContext
     private EntityManager entityManager;
 
+    private void joinCondition(CustomerSearchBuilder builder, StringBuilder sql) {
+        if (builder.getStaffId() != null) {
+            sql.append(" LEFT JOIN assignmentcustomer ac ON c.id = ac.customerid ");
+        }
+    }
+
+    private void whereCondition(CustomerSearchBuilder builder, StringBuilder sql) {
+        sql.append(" AND c.is_active = true ");
+
+        if (builder.getFullName() != null && !builder.getFullName().isBlank()) {
+            sql.append(" AND c.fullname LIKE '%").append(builder.getFullName()).append("%' ");
+        }
+
+        if (builder.getPhone() != null && !builder.getPhone().isBlank()) {
+            sql.append(" AND c.phone LIKE '%").append(builder.getPhone()).append("%' ");
+        }
+
+        if (builder.getEmail() != null && !builder.getEmail().isBlank()) {
+            sql.append(" AND c.email LIKE '%").append(builder.getEmail()).append("%' ");
+        }
+
+        if (builder.getStatus() != null && !builder.getStatus().isBlank()) {
+            sql.append(" AND c.status = '").append(builder.getStatus()).append("' ");
+        }
+
+        if (builder.getStaffId() != null) {
+            sql.append(" AND ac.staffid = ").append(builder.getStaffId()).append(" ");
+        }
+    }
+
     @Override
-    public List<Customer> findAll(CustomerSearchRequest request) {
-        StringBuilder sql = new StringBuilder("SELECT DISTINCT c FROM Customer c ");
+    public List<Customer> search(CustomerSearchBuilder builder) {
+        StringBuilder sql = new StringBuilder("SELECT DISTINCT c.* FROM customer c ");
 
-        if (request.getStaffId() != null) {
-            sql.append(" JOIN c.users u ");
-        }
+        joinCondition(builder, sql);
+        sql.append(" WHERE 1=1 ");
+        whereCondition(builder, sql);
+        sql.append(" ORDER BY c.createddate DESC ");
 
-        sql.append(" WHERE c.active = true ");
-
-        if (request.getFullName() != null && !request.getFullName().isBlank()) {
-            sql.append(" AND c.fullName LIKE :fullName ");
-        }
-
-        if (request.getPhone() != null && !request.getPhone().isBlank()) {
-            sql.append(" AND c.phone LIKE :phone ");
-        }
-
-        if (request.getEmail() != null && !request.getEmail().isBlank()) {
-            sql.append(" AND c.email LIKE :email ");
-        }
-
-        if (request.getStatus() != null && !request.getStatus().isBlank()) {
-            sql.append(" AND c.status = :status ");
-        }
-
-        if (request.getStaffId() != null) {
-            sql.append(" AND u.id = :staffId ");
-        }
-
-        sql.append(" ORDER BY c.createdDate DESC ");
-
-        Query query = entityManager.createQuery(sql.toString(), Customer.class);
-
-        if (request.getFullName() != null && !request.getFullName().isBlank()) {
-            query.setParameter("fullName", "%" + request.getFullName() + "%");
-        }
-
-        if (request.getPhone() != null && !request.getPhone().isBlank()) {
-            query.setParameter("phone", "%" + request.getPhone() + "%");
-        }
-
-        if (request.getEmail() != null && !request.getEmail().isBlank()) {
-            query.setParameter("email", "%" + request.getEmail() + "%");
-        }
-
-        if (request.getStatus() != null && !request.getStatus().isBlank()) {
-            query.setParameter("status", request.getStatus());
-        }
-
-        if (request.getStaffId() != null) {
-            query.setParameter("staffId", request.getStaffId());
-        }
-
+        Query query = entityManager.createNativeQuery(sql.toString(), Customer.class);
         return query.getResultList();
     }
 }

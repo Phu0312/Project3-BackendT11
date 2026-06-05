@@ -114,5 +114,38 @@
 </div>
 
 <th:block th:insert="~{_footer :: footer}"></th:block>
+<script>
+    $('#contactForm').submit(function (e) {
+        e.preventDefault();
+
+        $('.error-message').remove();
+
+        let valid = true;
+
+        const fullName = $('input[name="fullName"]').val();
+        const phone = $('input[name="customerPhone"]').val();
+
+        if (!fullName || fullName.trim() === '') {
+            $('input[name="fullName"]').after(
+                '<div class="error-message text-danger">Họ và tên không được để trống</div>'
+            );
+            valid = false;
+        }
+
+        if (!phone || phone.trim() === '') {
+            $('input[name="customerPhone"]').after(
+                '<div class="error-message text-danger">Số điện thoại không được để trống</div>'
+            );
+            valid = false;
+        }
+
+        if (!valid) {
+            return;
+        }
+
+        alert('Gửi liên hệ thành công');
+        
+    });
+</script>
 </body>
 </html>

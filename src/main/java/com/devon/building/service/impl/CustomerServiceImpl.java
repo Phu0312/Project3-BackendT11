@@ -1,6 +1,9 @@
 package com.devon.building.service.impl;
 
+import com.devon.building.builder.CustomerSearchBuilder;
 import com.devon.building.constant.SystemConstant;
+import com.devon.building.converter.CustomerMapper;
+import com.devon.building.converter.CustomerSearchConverter;
 import com.devon.building.entity.Customer;
 import com.devon.building.entity.User;
 import com.devon.building.enums.StatusCode;
@@ -11,40 +14,33 @@ import com.devon.building.model.response.StaffResponse;
 import com.devon.building.repository.CustomerRepository;
 import com.devon.building.repository.UserRepository;
 import com.devon.building.service.CustomerService;
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class CustomerServiceImpl implements CustomerService {
 
-    private final CustomerRepository customerRepository;
-    private final UserRepository userRepository;
+    CustomerRepository customerRepository;
+    UserRepository userRepository;
+    CustomerSearchConverter customerSearchConverter;
+    CustomerMapper customerMapper;
 
     @Override
     public List<CustomerResponse> findAll(CustomerSearchRequest request) {
-        List<Customer> customers = customerRepository.findAll(request);
-        List<CustomerResponse> result = new ArrayList<>();
+        CustomerSearchBuilder builder = customerSearchConverter.convertToBuilder(request);
+        List<Customer> customers = customerRepository.search(builder);
 
-        for (Customer customer : customers) {
-            CustomerResponse dto = new CustomerResponse();
-            dto.setId(customer.getId());
-            dto.setFullName(customer.getFullName());
-            dto.setPhone(customer.getPhone());
-            dto.setEmail(customer.getEmail());
-            dto.setCompanyName(customer.getCompanyName());
-            dto.setDemand(customer.getDemand());
-            dto.setStatus(customer.getStatus());
-            dto.setStatusName(StatusCode.getName(customer.getStatus()));
-            dto.setCreatedBy(customer.getCreatedBy());
-            dto.setCreatedDate(customer.getCreatedDate() == null ? "" : customer.getCreatedDate().toString());
-            result.add(dto);
-        }
-
-        return result;
+        return customers.stream()
+                .map(customerSearchConverter::toResponse)
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -56,51 +52,34 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public CustomerDTO findDTOById(Long id) {
         Customer customer = findById(id);
-
-        CustomerDTO dto = new CustomerDTO();
-        dto.setId(customer.getId());
-        dto.setFullName(customer.getFullName());
-        dto.setPhone(customer.getPhone());
-        dto.setEmail(customer.getEmail());
-        dto.setCompanyName(customer.getCompanyName());
-        dto.setDemand(customer.getDemand());
-        dto.setStatus(customer.getStatus());
-
-        return dto;
+        return customerMapper.toDTO(customer);
     }
 
     @Override
     public void save(CustomerDTO customerDTO) {
-        Customer customer = new Customer();
-        customer.setFullName(customerDTO.getFullName());
-        customer.setPhone(customerDTO.getPhone());
-        customer.setEmail(customerDTO.getEmail());
-        customer.setCompanyName(customerDTO.getCompanyName());
-        customer.setDemand(customerDTO.getDemand());
-        customer.setStatus(customerDTO.getStatus() == null || customerDTO.getStatus().isBlank()
-                ? StatusCode.CHUA_XU_LY.toString()
-                : customerDTO.getStatus());
-        customer.setActive(true);
+        Customer customer = customerMapper.toEntity(customerDTO);
 
+        if (customer.getStatus() == null || customer.getStatus().isBlank()) {
+            customer.setStatus(StatusCode.CHUA_XU_LY.toString());
+        }
+
+        customer.setActive(true);
         customerRepository.save(customer);
     }
 
     @Override
     public void update(CustomerDTO customerDTO) {
         Customer customer = findById(customerDTO.getId());
-
-        customer.setFullName(customerDTO.getFullName());
-        customer.setPhone(customerDTO.getPhone());
-        customer.setEmail(customerDTO.getEmail());
-        customer.setCompanyName(customerDTO.getCompanyName());
-        customer.setDemand(customerDTO.getDemand());
-        customer.setStatus(customerDTO.getStatus());
-
+        customerMapper.updateEntity(customer, customerDTO);
         customerRepository.save(customer);
     }
 
     @Override
     public void deleteCustomers(List<Long> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return;
+        }
+
         for (Long id : ids) {
             Customer customer = findById(id);
             customer.setActive(false);
@@ -113,29 +92,35 @@ public class CustomerServiceImpl implements CustomerService {
         Customer customer = findById(customerId);
         List<User> staffs = userRepository.findByUserRoleAndActiveTrue(SystemConstant.STAFF_ROLE);
 
-        List<StaffResponse> result = new ArrayList<>();
+        List<StaffResponse> responses = new ArrayList<>();
 
         for (User staff : staffs) {
-            StaffResponse dto = new StaffResponse();
-            dto.setId(staff.getId());
-            dto.setUserName(staff.getUserName());
+            StaffResponse item = new StaffResponse();
+            item.setId(staff.getId());
+            item.setUserName(staff.getUserName());
 
             boolean checked = customer.getUsers()
                     .stream()
                     .anyMatch(user -> user.getId().equals(staff.getId()));
 
-            dto.setChecked(checked ? "checked" : "");
-            result.add(dto);
+            item.setChecked(checked ? "checked" : "");
+            responses.add(item);
         }
 
-        return result;
+        return responses;
     }
 
     @Override
     public void assignCustomer(Long customerId, List<Long> staffIds) {
         Customer customer = findById(customerId);
-        List<User> staffs = userRepository.findAllById(staffIds);
-        customer.setUsers(staffs);
+
+        if (staffIds == null || staffIds.isEmpty()) {
+            customer.setUsers(new ArrayList<>());
+        } else {
+            List<User> staffs = userRepository.findAllById(staffIds);
+            customer.setUsers(staffs);
+        }
+
         customerRepository.save(customer);
     }
 }

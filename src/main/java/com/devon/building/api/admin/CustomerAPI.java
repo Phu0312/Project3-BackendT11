@@ -3,6 +3,7 @@ package com.devon.building.api.admin;
 import com.devon.building.model.dto.CustomerDTO;
 import com.devon.building.model.dto.ResponseDTO;
 import com.devon.building.service.CustomerService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,7 +18,7 @@ public class CustomerAPI {
     private final CustomerService customerService;
 
     @PostMapping
-    public ResponseEntity<ResponseDTO> createCustomer(@RequestBody CustomerDTO customerDTO) {
+    public ResponseEntity<ResponseDTO> createCustomer(@RequestBody @Valid CustomerDTO customerDTO) {
         customerService.save(customerDTO);
 
         ResponseDTO responseDTO = new ResponseDTO();

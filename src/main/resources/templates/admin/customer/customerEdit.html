@@ -292,17 +292,23 @@
     function validateCustomer(json) {
         $('.error-message').remove();
 
+        let valid = true;
+
         if (!json.fullName || json.fullName.trim() === '') {
-            $('#fullName').after('<span class="error-message" style="color:red"> Tên khách hàng không được trống </span>');
-            return false;
+            $('#fullName').after(
+                '<span class="error-message text-danger">Tên khách hàng không được để trống</span>'
+            );
+            valid = false;
         }
 
         if (!json.phone || json.phone.trim() === '') {
-            $('#phone').after('<span class="error-message" style="color:red"> Số điện thoại không được trống </span>');
-            return false;
+            $('#phone').after(
+                '<span class="error-message text-danger">Số điện thoại không được để trống</span>'
+            );
+            valid = false;
         }
 
-        return true;
+        return valid;
     }
 
     $('#btnAddCustomer').click(function (e) {
