@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
+<head>
+    <meta charset="UTF-8">
+    <th:block th:replace="~{admin/common/header :: header}"></th:block>
+</head>
+<body class="no-skin" style="font-family: 'Abel', sans-serif;">
+<th:block th:replace="~{admin/common/menu :: menu}"></th:block>
+<div class="main-container" id="main-container">
+
+    <script type="text/javascript">
+        try {
+            ace.settings.check('main-container', 'fixed')
+        } catch (e) {
+        }
+    </script>
+
+    <th:block th:replace="~{admin/common/sidebar :: sidebar}"></th:block>
+
+    <div class="main-content">
+        <div class="main-content-inner">
+            <div class="breadcrumbs" id="breadcrumbs">
+                <script type="text/javascript">
+                    try {
+                        ace.settings.check('breadcrumbs', 'fixed')
+                    } catch (e) {
+                    }
+                </script>
+
+                <ul class="breadcrumb">
+                    <li>
+                        <i class="ace-icon fa fa-home home-icon"></i>
+                        <a href="#">Home</a>
+                    </li>
+                    <li class="active">Dashboard</li>
+                </ul><!-- /.breadcrumb -->
+            </div>
+
+            <div class="page-content">
+
+                <div class="page-header">
+                    <h1>
+                        Dashboard
+                        <small>
+                            <i class="ace-icon fa fa-angle-double-right"></i>
+                            overview &amp; stats
+                        </small>
+                    </h1>
+                </div><!-- /.page-header -->
+
+                <div class="row">
+                    <div class="col-xs-12">
+                        <div class="widget-box">
+                            <div class="widget-header">
+                                <h4 class="widget-title">Tìm Kiếm</h4>
+
+                                <span class="widget-toolbar">
+										<a href="#" data-action="reload">
+											<i class="ace-icon fa fa-refresh"></i>
+										</a>
+
+										<a href="#" data-action="collapse">
+											<i class="ace-icon fa fa-chevron-up"></i>
+										</a>
+
+										<a href="#" data-action="close">
+											<i class="ace-icon fa fa-times"></i>
+										</a>
+									</span>
+                            </div>
+
+                            <div class="widget-body">
+                                <div class="widget-main">
+                                    <form class="form-horizontal" id="building-search-form" method="get"
+                                          th:action="@{/admin/buildings/list}"
+                                          th:object="${modelSearch}">
+                                        <div class="row">
+                                            <div class="form-group">
+                                                <div class="col-xs-12" style="margin-bottom: 10px;">
+                                                    <div class="col-sm-6">
+                                                        <label for="name">Tên tòa nhà</label>
+                                                        <input type="text" id="name" name="name"
+                                                               placeholder="Nhập tên tòa nhà" class="form-control"
+                                                               th:value="${modelSearch.name}">
+                                                    </div>
+
+                                                    <div class="col-sm-6">
+                                                        <label for="floorArea">Diện tích sàn</label>
+                                                        <input type="number" id="floorArea" name="floorArea"
+                                                               placeholder="Diện tích sàn..." class="form-control"
+                                                               th:value="${modelSearch.floorArea}">
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <div class="col-xs-12" style="margin-bottom: 10px;">
+                                                    <div class="col-sm-2">
+                                                        <label for="district">Quận</label>
+                                                        <select id="district" class="form-control"
+                                                                name="district">
+                                                            <option value="">--Chọn quận--</option>
+                                                            <option th:each="d : ${district}"
+                                                                    th:value="${d.key}"
+                                                                    th:selected="${d.key == modelSearch.district}"
+                                                                    th:text="${d.value}">
+                                                            </option>
+                                                        </select>
+                                                    </div>
+
+                                                    <div class="col-sm-5">
+                                                        <label for="floorArea">Phường</label>
+                                                        <input type="text" id="ward" name="ward"
+                                                               placeholder="Tên phường..." class="form-control"
+                                                               th:value="${modelSearch.ward}">
+                                                    </div>
+
+                                                    <div class="col-sm-5">
+                                                        <label for="street">Đường</label>
+                                                        <input type="text" id="street" name="street"
+                                                               placeholder="Tên đường..." class="form-control"
+                                                               th:value="${modelSearch.street}">
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <div class="col-xs-12" style="margin-bottom: 10px;">
+                                                    <div class="col-sm-4">
+                                                        <label for="numberOfBasement">Số tầng hầm</label>
+                                                        <input type="number" id="numberOfBasement"
+                                                               name="numberOfBasement" placeholder="Số tầng hầm..."
+                                                               class="form-control"
+                                                               th:value="${modelSearch.numberOfBasement}">
+                                                    </div>
+
+                                                    <div class="col-sm-4">
+                                                        <label for="direction">Hướng</label>
+                                                        <input type="text" id="direction" name="direction"
+                                                               placeholder="Hướng..." class="form-control"
+                                                               th:value="${modelSearch.direction}">
+                                                    </div>
+
+                                                    <div class="col-sm-4">
+                                                        <label for="level">Hạng</label>
+                                                        <input type="number" id="level" name="level"
+                                                               placeholder="Hạng..." class="form-control"
+                                                               th:value="${modelSearch.level}">
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <div class="col-xs-12" style="margin-bottom: 10px;">
+                                                    <div class="col-sm-3">
+                                                        <label for="areaFrom">Diện tích từ</label>
+                                                        <input type="number" id="areaFrom" name="areaFrom"
+                                                               placeholder="Diện tích từ..." class="form-control"
+                                                               th:value="${modelSearch.areaFrom}">
+                                                    </div>
+
+                                                    <div class="col-sm-3">
+                                                        <label for="areaTo">Diện tích đến</label>
+                                                        <input type="number" id="areaTo" name="areaTo"
+                                                               placeholder="Diện tích đến..." class="form-control"
+                                                               th:value="${modelSearch.areaTo}">
+                                                    </div>
+
+                                                    <div class="col-sm-3">
+                                                        <label for="rentPriceFrom">Giá thuê từ</label>
+                                                        <input type="number" id="rentPriceFrom" name="rentPriceFrom"
+                                                               placeholder="Giá thuê từ..." class="form-control"
+                                                               th:value="${modelSearch.rentPriceFrom}">
+                                                    </div>
+
+                                                    <div class="col-sm-3">
+                                                        <label for="rentPriceTo">Giá thuê đến</label>
+                                                        <input type="number" id="rentPriceTo" name="rentPriceTo"
+                                                               placeholder="Giá thuê đến..." class="form-control"
+                                                               th:value="${modelSearch.rentPriceTo}">
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <div class="col-xs-12" style="margin-bottom: 10px;">
+                                                    <div class="col-sm-5">
+                                                        <label for="managerName">Tên quản lí</label>
+                                                        <input type="text" id="managerName" name="managerName"
+                                                               placeholder="Tên quản lí..." class="form-control"
+                                                               th:value="${modelSearch.managerName}">
+                                                    </div>
+
+                                                    <div class="col-sm-5">
+                                                        <label for="managerPhoneNumber">SĐT quản lí</label>
+                                                        <input type="text" id="managerPhoneNumber"
+                                                               name="managerPhoneNumber" placeholder="SĐT quản lí..."
+                                                               class="form-control"
+                                                               th:value="${modelSearch.managerPhoneNumber}">
+                                                    </div>
+
+                                                    <th:block sec:authorize="hasRole('ROLE_MANAGER')">
+                                                        <div class="col-sm-2">
+                                                            <label for="staff">Chọn nhân viên</label>
+                                                            <select id="staff" class="form-control" name="staffId">
+                                                                <option value="">--Chọn nhân viên--</option>
+                                                                <option th:each="staff : ${staffs}"
+                                                                        th:value="${staff.key}"
+                                                                        th:selected="${staff.key == modelSearch.staffId}"
+                                                                        th:text="${staff.value}">
+                                                                </option>
+                                                            </select>
+                                                        </div>
+                                                    </th:block>
+
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <div class="col-xs-12" style="margin-bottom: 10px;">
+                                                    <div class="col-sm-6">
+                                                        <label class="checkbox-inline" th:each="type : ${typeCode}">
+                                                            <input type="checkbox" id="type1" name="typeCodes"
+                                                                   th:value="${type.key}"
+                                                                   th:text="${type.value}"
+                                                                   th:checked="${modelSearch.typeCodes != null
+                                                                   and modelSearch.typeCodes.contains(type.key)}">
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <div class="col-xs-12">
+                                                    <div class="col-sm-6">
+                                                        <button class="btn btn-sm btn-success"
+                                                                fdprocessedid="xh2txg" id="bthSearchBuilding">
+                                                            <i class="ace-icon glyphicon glyphicon-search"></i>
+                                                            Tìm kiếm
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="pull-right">
+                            <a th:href="@{/admin/buildings/edit}">
+                                <button class="btn btn-app btn-success btn-sm" fdprocessedid="nnh9w"
+                                        style="width: 70px;" title="Thêm tòa nhà">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                                         fill="currentColor" class="bi bi-building-add" viewBox="0 0 16 16">
+                                        <path
+                                                d="M12.5 16a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7m.5-5v1h1a.5.5 0 0 1 0 1h-1v1a.5.5 0 0 1-1 0v-1h-1a.5.5 0 0 1 0-1h1v-1a.5.5 0 0 1 1 0"/>
+                                        <path
+                                                d="M2 1a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v6.5a.5.5 0 0 1-1 0V1H3v14h3v-2.5a.5.5 0 0 1 .5-.5H8v4H3a1 1 0 0 1-1-1z"/>
+                                        <path
+                                                d="M4.5 2a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5zm3 0a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5zm3 0a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5zm-6 3a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5zm3 0a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5zm3 0a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5zm-6 3a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5zm3 0a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5z"/>
+                                    </svg>
+                                </button>
+                            </a>
+                            <th:block sec:authorize="hasRole('ROLE_MANAGER')">
+                                <button class="btn btn-app btn-danger btn-sm" fdprocessedid="nnh9w" style="width: 70px;"
+                                        title="Xóa tòa nhà" id="deleteBuildings">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor"
+                                         class="bi bi-building-dash" viewBox="0 0 16 16">
+                                        <path
+                                                d="M12.5 16a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7M11 12h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1 0-1"/>
+                                        <path
+                                                d="M2 1a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v6.5a.5.5 0 0 1-1 0V1H3v14h3v-2.5a.5.5 0 0 1 .5-.5H8v4H3a1 1 0 0 1-1-1z"/>
+                                        <path
+                                                d="M4.5 2a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5zm3 0a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5zm3 0a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5zm-6 3a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5zm3 0a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5zm3 0a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5zm-6 3a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5zm3 0a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5z"/>
+                                    </svg>
+                                </button>
+                            </th:block>
+
+                        </div>
+                    </div>
+                </div>
+
+                <div class="hr hr-18 dotted hr-double"></div>
+
+                <div class="row">
+                    <div class="col-xs-12">
+                        <table id="buildinglist" class="table table-striped table-bordered table-hover">
+                            <thead>
+                            <tr>
+                                <th class="center">
+                                    <label class="pos-rel">
+                                        <input type="checkbox" class="ace">
+                                        <span class="lbl"></span>
+                                    </label>
+                                </th>
+                                <th>Tên tòa nhà</th>
+                                <th>Địa chỉ</th>
+                                <th>Số tầng hầm</th>
+                                <th>Tên quản lí</th>
+                                <th>SĐT quản lí</th>
+                                <th>Diện tích sàn</th>
+                                <th>Diện tích thuê</th>
+                                <th>Diện tích trống</th>
+                                <th>Giá thuê</th>
+                                <th>Phí dịch vụ</th>
+                                <th>Phí môi giới</th>
+                                <th>Thao tác</th>
+                            </tr>
+                            </thead>
+
+                            <tbody>
+                            <tr th:each="building : ${results}">
+                                <td class="center">
+                                    <label class="pos-rel">
+                                        <input type="checkbox" class="ace" th:value="${building.id}">
+                                        <span class="lbl"></span>
+                                    </label>
+                                </td>
+                                <td th:text="${building.name}"></td>
+                                <td th:text="${building.address}"></td>
+                                <td th:text="${building.numberOfBasement}"></td>
+                                <td th:text="${building.managerName}"></td>
+                                <td th:text="${building.managerPhoneNumber}"></td>
+                                <td th:text="${building.floorArea}"></td>
+                                <td th:text="${building.rentArea}"></td>
+                                <td th:text="${building.emptyArea}"></td>
+                                <td th:text="${building.rentPrice}"></td>
+                                <td th:text="${building.serviceFee}"></td>
+                                <td th:text="${building.brokerageFee}"></td>
+                                <td>
+                                    <div class="hidden-sm hidden-xs btn-group"
+                                         style="display:flex;flex-wrap:nowrap">
+                                        <th:block sec:authorize="hasRole('ROLE_MANAGER')">
+                                            <button class="btn btn-xs btn-success" title="Giao tòa nhà"
+                                                    th:attr="onclick='assignmentBuilding(' + ${building.id} + ')'">
+                                                <i class="ace-icon fas fa-users bigger-120"></i>
+                                            </button>
+                                        </th:block>
+
+                                        <a th:href="@{/admin/buildings/{id}/update(id=${building.id})}"
+                                           class="btn btn-xs btn-info" title="Sửa thông tin tòa nhà">
+                                            <i class="ace-icon fas fa-pencil-alt bigger-120"></i>
+                                        </a>
+
+                                        <th:block sec:authorize="hasRole('ROLE_MANAGER')">
+                                            <button class="btn btn-xs btn-danger" title="Xóa tòa nhà"
+                                                    th:attr="onclick='deleteBuilding(' + ${building.id} + ')'">
+                                                <i class="ace-icon fas fa-trash bigger-120"></i>
+                                            </button>
+                                        </th:block>
+                                    </div>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div><!-- /.span -->
+                </div>
+            </div><!-- /.page-content -->
+        </div>
+    </div><!-- /.main-content -->
+
+    <!--Modal-->
+    <div class="modal" tabindex="-1" role="dialog" id="assignmentBuildingModal">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Danh sách nhân viên</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <table class="table table-striped table-bordered table-hover" id="staffList">
+                        <thead>
+                        <tr>
+                            <th class="center">
+                                <label class="pos-rel">
+                                    <input type="checkbox" class="ace">
+                                    <span class="lbl"></span>
+                                </label>
+                            </th>
+                            <th class="center">Tên nhân viên</th>
+                        </tr>
+                        </thead>
+
+                        <tbody>
+                        </tbody>
+                    </table>
+                    <input type="hidden" id="assignedBuildingId" value=""> <!--ẩn để lưu trữ id-->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="btnAssignBuilding">Giao tòa nhà</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<th:block th:replace="~{admin/common/footer :: footer}"></th:block>
+<th:block th:replace="~{admin/common/common-scripts :: jquery}"></th:block>
+<script>
+    function assignmentBuilding(buildingId) {
+        $("#assignmentBuildingModal").modal();
+        $("#assignedBuildingId").val(buildingId);
+        loadStaff(buildingId);
+    }
+
+    function loadStaff(buildingId) {
+        $.ajax({
+            url: '/api/buildings/' + buildingId + '/staff',
+            type: 'GET',
+            dataType: 'json',
+            success: function (response) {
+                let row = '';
+                $.each(response.data, function (index, item) {
+                    row += '<tr>';
+                    row += '<td class="center">';
+                    row += '<label class="pos-rel">'
+                        + '<input type="checkbox" class="ace" value="' + item.id + '" ' + item.checked + '>'
+                        + '<span class="lbl"></span>';
+                    row += '</label>';
+                    row += '</td>';
+                    row += '<td class="center">' + item.userName + '</td>';
+                    row += '</tr>';
+                });
+                $('#staffList tbody').html(row);
+            },
+            error: function (response) {
+                alert("Có lỗi xảy ra. Vui lòng thử lại");
+            }
+        });
+    }
+
+    $("#btnAssignBuilding").click(function (e) {
+        e.preventDefault();
+        const data = {};
+        const selectedStaffId = [];
+        $('#staffList tbody input[type ="checkbox"]:checked').each(function () {
+            const staffId = $(this).val();
+            selectedStaffId.push(staffId);
+        });
+        data["staffId"] = selectedStaffId;
+        data["buildingId"] = $("#assignedBuildingId").val();
+        console.log(data);
+        $.ajax({
+            url: '/api/buildings/assign',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(data),
+            success: function (response) {
+                alert("Giao tòa nhà thành công");
+                $("#assignmentBuildingModal").modal('hide');
+            },
+            error: function (response) {
+                alert("Có lỗi xảy ra khi giao tòa nhà. Vui lòng thử lại.");
+            }
+        });
+    });
+
+    $("#bthSearchBuilding").click(function (e) {
+        e.preventDefault();
+        $('#building-search-form').submit();
+    });
+
+    $("#deleteBuildings").click(function (e) {
+        e.preventDefault();
+        var buildingIds = [];
+        $('#buildinglist tbody input[type ="checkbox"]:checked').each(function () {
+            buildingIds.push($(this).val());
+        });
+        if (buildingIds.length === 0) {
+            alert("Vui lòng chọn ít nhất 1 tòa nhà để xóa!");
+            return;
+        } else {
+            deleteBuildings(buildingIds);
+        }
+    });
+
+    function deleteBuildings(buildingIds) {
+        $.ajax({
+            url: '/api/buildings/' + buildingIds.join(","),
+            type: 'DELETE',
+            dataType: 'json',
+            success: function (response) {
+                alert("Xóa tòa nhà thành công");
+                window.location.reload();
+            },
+            error: function (response) {
+                alert("Có lỗi xảy ra khi xóa tòa nhà. Vui lòng thử lại");
+            }
+        });
+    }
+
+    function deleteBuilding(buildingId) {
+        buildingIds = Array.of(buildingId);
+        deleteBuildings(buildingIds);
+    }
+</script>
+
+</body>
+</html>

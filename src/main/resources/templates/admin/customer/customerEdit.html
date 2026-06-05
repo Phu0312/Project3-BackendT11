@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Thông tin khách hàng</title>
+    <th:block th:replace="~{admin/common/header :: header}"></th:block>
+</head>
+
+<body class="no-skin" style="font-family: 'Abel', sans-serif;">
+
+<th:block th:replace="~{admin/common/menu :: menu}"></th:block>
+
+<div class="main-container" id="main-container">
+    <th:block th:replace="~{admin/common/sidebar :: sidebar}"></th:block>
+
+    <div class="main-content">
+        <div class="main-content-inner">
+            <div class="page-content">
+
+                <div class="page-header">
+                    <h1>
+                        Thông tin khách hàng
+                        <small>
+                            <i class="ace-icon fa fa-angle-double-right"></i>
+                            thêm / cập nhật
+                        </small>
+                    </h1>
+                </div>
+
+                <form id="form-edit" class="form-horizontal">
+                    <input type="hidden" name="id" th:value="${customerEdit.id}">
+
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">Tên khách hàng</label>
+                        <div class="col-sm-8">
+                            <input type="text"
+                                   id="fullName"
+                                   name="fullName"
+                                   class="form-control"
+                                   th:value="${customerEdit.fullName}">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">Số điện thoại</label>
+                        <div class="col-sm-8">
+                            <input type="text"
+                                   id="phone"
+                                   name="phone"
+                                   class="form-control"
+                                   th:value="${customerEdit.phone}">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">Email</label>
+                        <div class="col-sm-8">
+                            <input type="text"
+                                   id="email"
+                                   name="email"
+                                   class="form-control"
+                                   th:value="${customerEdit.email}">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">Tên công ty</label>
+                        <div class="col-sm-8">
+                            <input type="text"
+                                   id="companyName"
+                                   name="companyName"
+                                   class="form-control"
+                                   th:value="${customerEdit.companyName}">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">Nhu cầu</label>
+                        <div class="col-sm-8">
+                            <textarea id="demand"
+                                      name="demand"
+                                      class="form-control"
+                                      th:text="${customerEdit.demand}"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">Trạng thái</label>
+                        <div class="col-sm-8">
+                            <select id="status" name="status" class="form-control">
+                                <option value="">-- Chọn trạng thái --</option>
+                                <option th:each="item : ${status}"
+                                        th:value="${item.key}"
+                                        th:text="${item.value}"
+                                        th:selected="${customerEdit.status != null and customerEdit.status == item.key}">
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="clearfix form-actions">
+                        <div class="col-md-offset-2 col-md-10">
+                            <button class="btn btn-info" type="button" id="btnAddCustomer">
+                                <i class="ace-icon fa fa-check bigger-110"></i>
+                                Lưu khách hàng
+                            </button>
+
+                            <a class="btn" th:href="@{/admin/customers/list}">
+                                <i class="ace-icon fa fa-undo bigger-110"></i>
+                                Quay lại
+                            </a>
+                        </div>
+                    </div>
+                </form>
+
+                <div th:if="${customerEdit.id != null}">
+
+                    <div class="modal fade" id="transactionModal" tabindex="-1">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal">×</button>
+                                    <h4 class="modal-title">Thông tin giao dịch</h4>
+                                </div>
+
+                                <div class="modal-body">
+                                    <input type="hidden" id="transactionId">
+                                    <input type="hidden" id="transactionType">
+                                    <input type="hidden" id="customerId">
+
+                                    <label>Chi tiết giao dịch</label>
+                                    <textarea id="transactionNote" class="form-control"></textarea>
+                                </div>
+
+                                <div class="modal-footer">
+                                    <button class="btn btn-primary" type="button" onclick="submitTransaction()">
+                                        Lưu giao dịch
+                                    </button>
+
+                                    <button class="btn btn-danger" type="button" data-dismiss="modal">
+                                        Hủy
+                                    </button>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div th:each="item : ${transactionType}">
+                        <div class="col-xs-12">
+                            <h2 class="smaller lighter blue">
+                                <span th:text="${item.value}"></span>
+
+                                <button class="btn btn-md btn-success pull-right"
+                                        type="button"
+                                        title="Thêm giao dịch"
+                                        th:data-code="${item.key}"
+                                        th:data-customer-id="${customerEdit.id}"
+                                        onclick="addTransaction(this.dataset.code, this.dataset.customerId)">
+                                    <i class="ace-icon glyphicon glyphicon-plus smaller-80"></i>
+                                    Thêm giao dịch
+                                </button>
+                            </h2>
+
+                            <div class="hr hr-16 dotted hr-dotted"></div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-xs-12">
+                                <table class="table table-striped table-bordered table-hover">
+                                    <thead>
+                                    <tr>
+                                        <th>Ngày tạo</th>
+                                        <th>Người tạo</th>
+                                        <th>Ngày sửa</th>
+                                        <th>Người sửa</th>
+                                        <th>Chi tiết giao dịch</th>
+                                        <th>Thao tác</th>
+                                    </tr>
+                                    </thead>
+
+                                    <tbody th:if="${item.key == 'CSKH'}">
+                                    <tr th:each="transaction : ${CSKH}">
+                                        <td th:text="${transaction.createdDate}"></td>
+                                        <td th:text="${transaction.createdBy}"></td>
+                                        <td th:text="${transaction.modifiedDate}"></td>
+                                        <td th:text="${transaction.modifiedBy}"></td>
+                                        <td th:text="${transaction.note}"></td>
+
+                                        <td>
+                                            <button class="btn btn-xs btn-info"
+                                                    type="button"
+                                                    th:data-id="${transaction.id}"
+                                                    th:data-code="${transaction.code}"
+                                                    th:data-note="${transaction.note}"
+                                                    th:data-customer-id="${customerEdit.id}"
+                                                    onclick="editTransaction(this.dataset.id, this.dataset.code, this.dataset.customerId, this.dataset.note)">
+                                                <i class="ace-icon fas fa-pencil-alt bigger-120"></i>
+                                            </button>
+
+                                            <button sec:authorize="hasRole('MANAGER')"
+                                                    class="btn btn-xs btn-danger"
+                                                    type="button"
+                                                    th:data-id="${transaction.id}"
+                                                    onclick="deleteTransaction(this.dataset.id)">
+                                                <i class="ace-icon fa fa-trash bigger-120"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    </tbody>
+
+                                    <tbody th:if="${item.key == 'DDX'}">
+                                    <tr th:each="transaction : ${DDX}">
+                                        <td th:text="${transaction.createdDate}"></td>
+                                        <td th:text="${transaction.createdBy}"></td>
+                                        <td th:text="${transaction.modifiedDate}"></td>
+                                        <td th:text="${transaction.modifiedBy}"></td>
+                                        <td th:text="${transaction.note}"></td>
+
+                                        <td>
+                                            <button class="btn btn-xs btn-info"
+                                                    type="button"
+                                                    th:data-id="${transaction.id}"
+                                                    th:data-code="${transaction.code}"
+                                                    th:data-note="${transaction.note}"
+                                                    th:data-customer-id="${customerEdit.id}"
+                                                    onclick="editTransaction(this.dataset.id, this.dataset.code, this.dataset.customerId, this.dataset.note)">
+                                                <i class="ace-icon fas fa-pencil-alt bigger-120"></i>
+                                            </button>
+
+                                            <button sec:authorize="hasRole('MANAGER')"
+                                                    class="btn btn-xs btn-danger"
+                                                    type="button"
+                                                    th:data-id="${transaction.id}"
+                                                    onclick="deleteTransaction(this.dataset.id)">
+                                                <i class="ace-icon fa fa-trash bigger-120"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    </tbody>
+
+                                    <tbody th:if="${item.key == 'DC'}">
+                                    <tr th:each="transaction : ${DC}">
+                                        <td th:text="${transaction.createdDate}"></td>
+                                        <td th:text="${transaction.createdBy}"></td>
+                                        <td th:text="${transaction.modifiedDate}"></td>
+                                        <td th:text="${transaction.modifiedBy}"></td>
+                                        <td th:text="${transaction.note}"></td>
+
+                                        <td>
+                                            <button class="btn btn-xs btn-info"
+                                                    type="button"
+                                                    th:data-id="${transaction.id}"
+                                                    th:data-code="${transaction.code}"
+                                                    th:data-note="${transaction.note}"
+                                                    th:data-customer-id="${customerEdit.id}"
+                                                    onclick="editTransaction(this.dataset.id, this.dataset.code, this.dataset.customerId, this.dataset.note)">
+                                                <i class="ace-icon fas fa-pencil-alt bigger-120"></i>
+                                            </button>
+
+                                            <button sec:authorize="hasRole('MANAGER')"
+                                                    class="btn btn-xs btn-danger"
+                                                    type="button"
+                                                    th:data-id="${transaction.id}"
+                                                    onclick="deleteTransaction(this.dataset.id)">
+                                                <i class="ace-icon fa fa-trash bigger-120"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    </tbody>
+
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<th:block th:replace="~{admin/common/footer :: footer}"></th:block>
+<th:block th:replace="~{admin/common/common-scripts :: jquery}"></th:block>
+
+<script>
+    function validateCustomer(json) {
+        $('.error-message').remove();
+
+        if (!json.fullName || json.fullName.trim() === '') {
+            $('#fullName').after('<span class="error-message" style="color:red"> Tên khách hàng không được trống </span>');
+            return false;
+        }
+
+        if (!json.phone || json.phone.trim() === '') {
+            $('#phone').after('<span class="error-message" style="color:red"> Số điện thoại không được trống </span>');
+            return false;
+        }
+
+        return true;
+    }
+
+    $('#btnAddCustomer').click(function (e) {
+        e.preventDefault();
+
+        const formData = $('#form-edit').serializeArray();
+        const json = {};
+
+        $.each(formData, function (i, it) {
+            json[it.name] = it.value;
+        });
+
+        if (!validateCustomer(json)) {
+            alert('Lỗi khi lưu khách hàng');
+            return;
+        }
+
+        if (!json.id) {
+            addCustomer(json);
+        } else {
+            updateCustomer(json);
+        }
+    });
+
+    function addCustomer(json) {
+        $.ajax({
+            type: "POST",
+            url: "/api/customers",
+            data: JSON.stringify(json),
+            dataType: "json",
+            contentType: "application/json",
+            success: function (response) {
+                alert(response.message);
+                window.location.href = "/admin/customers/list";
+            },
+            error: function () {
+                alert("Thêm khách hàng thất bại");
+            }
+        });
+    }
+
+    function updateCustomer(json) {
+        $.ajax({
+            type: "PUT",
+            url: "/api/customers",
+            data: JSON.stringify(json),
+            dataType: "json",
+            contentType: "application/json",
+            success: function (response) {
+                alert(response.message);
+                window.location.href = "/admin/customers/list";
+            },
+            error: function () {
+                alert("Cập nhật khách hàng thất bại");
+            }
+        });
+    }
+
+    function addTransaction(type, customerId) {
+        $('#transactionId').val('');
+        $('#transactionType').val(type);
+        $('#customerId').val(customerId);
+        $('#transactionNote').val('');
+        $('#transactionModal').modal('show');
+    }
+
+    function editTransaction(id, code, customerId, note) {
+        $('#transactionId').val(id);
+        $('#transactionType').val(code);
+        $('#customerId').val(customerId);
+        $('#transactionNote').val(note || '');
+        $('#transactionModal').modal('show');
+    }
+
+    function submitTransaction() {
+        const id = $('#transactionId').val();
+
+        const data = {
+            id: id,
+            customerId: $('#customerId').val(),
+            code: $('#transactionType').val(),
+            note: $('#transactionNote').val()
+        };
+
+        if (!data.note || data.note.trim() === '') {
+            alert('Vui lòng nhập chi tiết giao dịch');
+            return;
+        }
+
+        $.ajax({
+            type: id ? "PUT" : "POST",
+            url: "/api/transactions",
+            contentType: "application/json",
+            data: JSON.stringify(data),
+            success: function () {
+                alert(id ? "Cập nhật giao dịch thành công" : "Thêm giao dịch thành công");
+                location.reload();
+            },
+            error: function () {
+                alert("Lỗi khi lưu giao dịch");
+            }
+        });
+    }
+
+    function deleteTransaction(id) {
+        if (!confirm('Bạn có chắc chắn muốn xóa giao dịch này?')) {
+            return;
+        }
+
+        $.ajax({
+            type: "DELETE",
+            url: "/api/transactions/" + id,
+            success: function () {
+                alert("Xóa giao dịch thành công");
+                location.reload();
+            },
+            error: function () {
+                alert("Lỗi khi xóa giao dịch");
+            }
+        });
+    }
+</script>
+
+</body>
+</html>
