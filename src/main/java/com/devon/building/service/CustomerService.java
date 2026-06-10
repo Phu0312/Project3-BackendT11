@@ -24,4 +24,6 @@ public interface CustomerService {
     List<StaffResponse> loadStaffs(Long customerId);
 
     void assignCustomer(Long customerId, List<Long> staffIds);
+
+    boolean hasPermissionToViewCustomer(Long customerId);
 }

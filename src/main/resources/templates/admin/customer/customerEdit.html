@@ -7,9 +7,19 @@
     <meta charset="UTF-8">
     <title>Thông tin khách hàng</title>
     <th:block th:replace="~{admin/common/header :: header}"></th:block>
+    <style>body,
+    input,
+    select,
+    textarea,
+    button,
+    table,
+    label,
+    h1, h2, h3, h4, h5 {
+        font-family: Arial, Helvetica, sans-serif !important;
+    }</style>
 </head>
 
-<body class="no-skin" style="font-family: 'Abel', sans-serif;">
+<body class="no-skin">
 
 <th:block th:replace="~{admin/common/menu :: menu}"></th:block>
 
@@ -304,6 +314,13 @@
         if (!json.phone || json.phone.trim() === '') {
             $('#phone').after(
                 '<span class="error-message text-danger">Số điện thoại không được để trống</span>'
+            );
+            valid = false;
+        }
+
+        if (!json.status) {
+            $('#status').after(
+                '<span class="error-message text-danger">Trạng thái không được để trống</span>'
             );
             valid = false;
         }

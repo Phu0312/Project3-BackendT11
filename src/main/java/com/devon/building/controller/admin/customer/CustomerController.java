@@ -1,5 +1,6 @@
 package com.devon.building.controller.admin.customer;
 
+import com.devon.building.constant.SystemConstant;
 import com.devon.building.enums.StatusCode;
 import com.devon.building.enums.TransactionCode;
 import com.devon.building.model.dto.CustomerDTO;
@@ -7,6 +8,7 @@ import com.devon.building.model.request.CustomerSearchRequest;
 import com.devon.building.service.CustomerService;
 import com.devon.building.service.TransactionService;
 import com.devon.building.service.UserService;
+import com.devon.building.utils.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,6 +24,10 @@ public class CustomerController {
 
     @GetMapping("/admin/customers/list")
     public ModelAndView list(CustomerSearchRequest request) {
+        if (SecurityUtils.getAuthorities().contains(SystemConstant.STAFF_ROLE)) {
+            request.setStaffId(null);
+        }
+
         ModelAndView mav = new ModelAndView("admin/customer/customerList");
         mav.addObject("customers", customerService.findAll(request));
         mav.addObject("staffs", userService.loadStaff());
@@ -30,8 +36,12 @@ public class CustomerController {
         return mav;
     }
 
-    @GetMapping("/admin/customers/edit")
+    @GetMapping({"/admin/customers/edit", "/admin/customers/detail"})
     public ModelAndView edit(Long id) {
+        if (id != null && !customerService.hasPermissionToViewCustomer(id)) {
+            return new ModelAndView("redirect:/403");
+        }
+
         ModelAndView mav = new ModelAndView("admin/customer/customerEdit");
 
         CustomerDTO customerDTO = new CustomerDTO();

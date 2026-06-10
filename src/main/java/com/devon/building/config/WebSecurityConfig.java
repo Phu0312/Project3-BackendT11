@@ -54,6 +54,7 @@ public class WebSecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/buildings/assign").hasRole("MANAGER")
                         .requestMatchers(HttpMethod.GET, "/api/buildings/*/staff").hasRole("MANAGER")
                         .requestMatchers(HttpMethod.GET, "/admin/customers/list", "/admin/customers/edit").hasAnyRole("MANAGER", "STAFF")
+                        .requestMatchers(HttpMethod.POST, "/api/customers").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/customers", "/api/customers/assignment", "/api/transactions").hasAnyRole("MANAGER", "STAFF")
                         .requestMatchers(HttpMethod.PUT, "/api/customers", "/api/transactions").hasAnyRole("MANAGER", "STAFF")
                         .requestMatchers(HttpMethod.GET, "/api/customers/*/staff").hasRole("MANAGER")

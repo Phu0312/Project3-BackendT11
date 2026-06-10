@@ -15,5 +15,7 @@ public class CustomerDTO extends AbstractDTO {
     private String email;
     private String companyName;
     private String demand;
+
+    @NotBlank(message = "Trạng thái không được để trống")
     private String status;
 }

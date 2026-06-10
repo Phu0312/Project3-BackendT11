@@ -5,7 +5,10 @@ import com.devon.building.model.dto.ResponseDTO;
 import com.devon.building.service.CustomerService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,19 +21,48 @@ public class CustomerAPI {
     private final CustomerService customerService;
 
     @PostMapping
-    public ResponseEntity<ResponseDTO> createCustomer(@RequestBody @Valid CustomerDTO customerDTO) {
+    public ResponseEntity<ResponseDTO> createCustomer(@RequestBody @Valid CustomerDTO customerDTO,
+                                                      BindingResult bindingResult) {
+        ResponseDTO responseDTO = new ResponseDTO();
+
+        if (bindingResult.hasErrors()) {
+            List<String> errorMessages = bindingResult.getFieldErrors()
+                    .stream()
+                    .map(FieldError::getDefaultMessage)
+                    .toList();
+
+            responseDTO.setMessage("Failed to add customer");
+            responseDTO.setDetail(errorMessages);
+
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseDTO);
+        }
+
         customerService.save(customerDTO);
 
-        ResponseDTO responseDTO = new ResponseDTO();
         responseDTO.setMessage("Thêm khách hàng thành công");
         return ResponseEntity.ok(responseDTO);
     }
 
+
     @PutMapping
-    public ResponseEntity<ResponseDTO> updateCustomer(@RequestBody CustomerDTO customerDTO) {
+    public ResponseEntity<ResponseDTO> updateCustomer(@RequestBody @Valid CustomerDTO customerDTO,
+                                                      BindingResult bindingResult) {
+        ResponseDTO responseDTO = new ResponseDTO();
+
+        if (bindingResult.hasErrors()) {
+            List<String> errorMessages = bindingResult.getFieldErrors()
+                    .stream()
+                    .map(FieldError::getDefaultMessage)
+                    .toList();
+
+            responseDTO.setMessage("Failed to update customer");
+            responseDTO.setDetail(errorMessages);
+
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseDTO);
+        }
+
         customerService.update(customerDTO);
 
-        ResponseDTO responseDTO = new ResponseDTO();
         responseDTO.setMessage("Cập nhật khách hàng thành công");
         return ResponseEntity.ok(responseDTO);
     }

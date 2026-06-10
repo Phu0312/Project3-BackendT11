@@ -78,7 +78,8 @@
                     <form id="contactForm" class="form-horizontal">
                         <div class="form-group">
                             <div class="col-xs-6">
-                                <input type="text" class="form-control" placeholder="Họ và tên" name="fullName">
+                                <input type="text" class="form-control" placeholder="Họ và tên" name="fullName"
+                                       required>
                                 <!--required-->
                             </div>
                         </div>
@@ -90,7 +91,7 @@
                         <div class="form-group">
                             <div class="col-xs-6">
                                 <input type="text" class="form-control" placeholder="Số điện thoại"
-                                       name="customerPhone">
+                                       name="customerPhone" required>
                                 <!--required-->
                             </div>
                         </div>
@@ -114,37 +115,47 @@
 </div>
 
 <th:block th:insert="~{_footer :: footer}"></th:block>
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
 <script>
     $('#contactForm').submit(function (e) {
         e.preventDefault();
 
-        $('.error-message').remove();
+        let fullName = $('input[name="fullName"]').val().trim();
+        let phone = $('input[name="customerPhone"]').val().trim();
 
-        let valid = true;
-
-        const fullName = $('input[name="fullName"]').val();
-        const phone = $('input[name="customerPhone"]').val();
-
-        if (!fullName || fullName.trim() === '') {
-            $('input[name="fullName"]').after(
-                '<div class="error-message text-danger">Họ và tên không được để trống</div>'
-            );
-            valid = false;
-        }
-
-        if (!phone || phone.trim() === '') {
-            $('input[name="customerPhone"]').after(
-                '<div class="error-message text-danger">Số điện thoại không được để trống</div>'
-            );
-            valid = false;
-        }
-
-        if (!valid) {
+        if (fullName === '') {
+            alert('Vui lòng nhập họ và tên');
+            $('input[name="fullName"]').focus();
             return;
         }
 
-        alert('Gửi liên hệ thành công');
-        
+        if (phone === '') {
+            alert('Vui lòng nhập số điện thoại');
+            $('input[name="customerPhone"]').focus();
+            return;
+        }
+
+        const data = {
+            fullName: fullName,
+            email: $('input[name="email"]').val(),
+            phone: phone,
+            demand: $('input[name="demand"]').val(),
+            status: 'CHUA_XU_LY'
+        };
+
+        $.ajax({
+            url: '/api/customers',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(data),
+            success: function () {
+                alert('Gửi liên hệ thành công');
+                $('#contactForm')[0].reset();
+            },
+            error: function () {
+                alert('Gửi liên hệ thất bại');
+            }
+        });
     });
 </script>
 </body>

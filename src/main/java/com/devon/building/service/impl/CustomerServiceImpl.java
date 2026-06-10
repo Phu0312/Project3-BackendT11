@@ -14,6 +14,7 @@ import com.devon.building.model.response.StaffResponse;
 import com.devon.building.repository.CustomerRepository;
 import com.devon.building.repository.UserRepository;
 import com.devon.building.service.CustomerService;
+import com.devon.building.utils.SecurityUtils;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -122,5 +123,19 @@ public class CustomerServiceImpl implements CustomerService {
         }
 
         customerRepository.save(customer);
+    }
+
+    @Override
+    public boolean hasPermissionToViewCustomer(Long customerId) {
+        if (SecurityUtils.getAuthorities().contains(SystemConstant.MANAGER_ROLE)) {
+            return true;
+        }
+
+        Customer customer = findById(customerId);
+        String username = SecurityUtils.getCurrentUser().getUsername();
+
+        return customer.getUsers()
+                .stream()
+                .anyMatch(user -> user.getUserName().equals(username));
     }
 }

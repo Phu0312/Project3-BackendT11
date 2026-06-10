@@ -1,8 +1,10 @@
 package com.devon.building.repository.custom.impl;
 
 import com.devon.building.builder.CustomerSearchBuilder;
+import com.devon.building.constant.SystemConstant;
 import com.devon.building.entity.Customer;
 import com.devon.building.repository.custom.CustomerRepositoryCustom;
+import com.devon.building.utils.SecurityUtils;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
@@ -17,8 +19,12 @@ public class CustomerRepositoryImpl implements CustomerRepositoryCustom {
     private EntityManager entityManager;
 
     private void joinCondition(CustomerSearchBuilder builder, StringBuilder sql) {
-        if (builder.getStaffId() != null) {
-            sql.append(" LEFT JOIN assignmentcustomer ac ON c.id = ac.customerid ");
+        if (builder.getStaffId() != null || SecurityUtils.getAuthorities().contains(SystemConstant.STAFF_ROLE)) {
+            sql.append(" INNER JOIN assignmentcustomer ac ON c.id = ac.customerid ");
+        }
+
+        if (SecurityUtils.getAuthorities().contains(SystemConstant.STAFF_ROLE)) {
+            sql.append(" INNER JOIN user u ON ac.staffid = u.id ");
         }
     }
 
@@ -41,8 +47,14 @@ public class CustomerRepositoryImpl implements CustomerRepositoryCustom {
             sql.append(" AND c.status = '").append(builder.getStatus()).append("' ");
         }
 
-        if (builder.getStaffId() != null) {
-            sql.append(" AND ac.staffid = ").append(builder.getStaffId()).append(" ");
+        if (SecurityUtils.getAuthorities().contains(SystemConstant.STAFF_ROLE)) {
+            sql.append(" AND u.username = '")
+                    .append(SecurityUtils.getCurrentUser().getUsername())
+                    .append("' ");
+        } else if (builder.getStaffId() != null) {
+            sql.append(" AND ac.staffid = ")
+                    .append(builder.getStaffId())
+                    .append(" ");
         }
     }
 
